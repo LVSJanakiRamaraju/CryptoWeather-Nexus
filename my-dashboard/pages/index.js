@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import WeatherCard from '../components/WeatherCard';
 import CryptoCard from '../components/CryptoCard';
-import NewsCard from '../components/NewsCard';
+
 
 const Dashboard = () => {
   const [weatherData, setWeatherData] = useState([]);
+  const [cryptoData, setCryptoData] = useState([]);
+
 
   const fetchWeatherData = async () => {
     const cities = ['New York', 'London', 'Tokyo'];
@@ -24,9 +26,25 @@ const Dashboard = () => {
     }
   };
 
+  // Fetch cryptocurrency data (BTC, ETH, and one more)
+  const fetchCryptoData = async () => {
+    try {
+      const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&order=market_cap_desc&per_page=3&page=1&sparkline=false';
+
+    console.log('Fetching Crypto Data from:', apiUrl); 
+    const response = await axios.get(apiUrl);
+    console.log('Crypto API Response:', response.data); 
+    
+    setCryptoData(response.data);
+  } catch (error) {
+    console.error('Error fetching crypto data:', error.response?.data || error.message);
+    return null;
+    }
+  };
 
   useEffect(() => {
     fetchWeatherData();
+    fetchCryptoData();
   }, []);
 
   return (
@@ -36,6 +54,9 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <WeatherCard data={weatherData} />
+        </div>
+        <div>
+          <CryptoCard data={cryptoData} />
         </div>
       </div>
     </div>
