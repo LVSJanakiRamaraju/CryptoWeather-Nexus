@@ -29,7 +29,7 @@ const Dashboard = () => {
   // Fetch cryptocurrency data (BTC, ETH, and one more)
   const fetchCryptoData = async () => {
     try {
-      const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&order=market_cap_desc&per_page=3&page=1&sparkline=false';
+      const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana&order=market_cap_desc&per_page=3&page=1&sparkline=false';
 
     console.log('Fetching Crypto Data from:', apiUrl); 
     const response = await axios.get(apiUrl);
