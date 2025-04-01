@@ -1,14 +1,14 @@
-// pages/index.js
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import WeatherCard from '../components/WeatherCard';
 import CryptoCard from '../components/CryptoCard';
-
+import NewsCard from '../components/NewsCard';
 
 const Dashboard = () => {
   const [weatherData, setWeatherData] = useState([]);
   const [cryptoData, setCryptoData] = useState([]);
-
+  const [newsData, setNewsData] = useState([]);
 
   const fetchWeatherData = async () => {
     const cities = ['New York', 'London', 'Tokyo'];
@@ -26,14 +26,14 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch cryptocurrency data (BTC, ETH, and one more)
   const fetchCryptoData = async () => {
     try {
-      const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana&order=market_cap_desc&per_page=3&page=1&sparkline=false';
+      const apiUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana&order=market_cap_desc&per_page=3&page=1&sparkline=false`;
 
-    console.log('Fetching Crypto Data from:', apiUrl); 
+    console.log('Fetching Crypto Data from:', apiUrl);
+
     const response = await axios.get(apiUrl);
-    console.log('Crypto API Response:', response.data); 
+    console.log('Crypto API Response:', response.data);
     
     setCryptoData(response.data);
   } catch (error) {
@@ -42,9 +42,26 @@ const Dashboard = () => {
     }
   };
 
+  const fetchNewsData = async () => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_NEWSAPI_KEY;
+      const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&q=crypto&language=en`;
+  
+      console.log('Fetching News Data from:', url);
+  
+      const response = await axios.get(url);
+      console.log('API Response:', response.data);
+      
+      setNewsData(response.data.results.slice(0, 5));
+    } catch (error) {
+      console.error('Error fetching news data:', error.response?.data || error.message);
+    }
+  };
+
   useEffect(() => {
     fetchWeatherData();
     fetchCryptoData();
+    fetchNewsData();
   }, []);
 
   return (
@@ -57,6 +74,9 @@ const Dashboard = () => {
         </div>
         <div>
           <CryptoCard data={cryptoData} />
+        </div>
+        <div>
+          <NewsCard data={newsData} />
         </div>
       </div>
     </div>
