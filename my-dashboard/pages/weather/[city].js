@@ -23,6 +23,8 @@ const WeatherDetail = () => {
           `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
         );
 
+        console.log(geoResponse);
+
         if (geoResponse.data.length === 0) {
           throw new Error("City not found");
         }
@@ -72,7 +74,6 @@ const WeatherDetail = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold">Weather History for {city}</h1>
-
       {loading ? (
         <p>Loading data...</p>
       ) : error ? (
