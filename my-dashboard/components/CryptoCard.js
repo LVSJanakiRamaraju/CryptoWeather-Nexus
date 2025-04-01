@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Link from 'next/link';
 
 const CryptoCard = ({ data }) => {
   if (!data || data.length === 0) return <div>No data available</div>;
@@ -13,6 +14,7 @@ const CryptoCard = ({ data }) => {
           <p>Price: ${crypto.current_price}</p>
           <p>24h Change: {crypto.price_change_percentage_24h}%</p>
           <p>Market Cap: ${crypto.market_cap}</p>
+          <Link href={`/crypto/${crypto.id}`} className="text-blue-500">View Details</Link>
         </div>
       ))}
     </div>

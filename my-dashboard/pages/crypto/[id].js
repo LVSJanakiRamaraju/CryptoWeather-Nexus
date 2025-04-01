@@ -1,51 +1,73 @@
-
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
-const CryptoDetails = () => {
-  const [cryptoDetails, setCryptoDetails] = useState(null);
+const CryptoDetail = () => {
   const router = useRouter();
-  const { id } = router.query; 
-
-  const fetchCryptoDetails = async (id) => {
-    try {
-        const apiUrl = `${process.env.NEXT_PUBLIC_COINGECKO_API_URL}/simple/price?ids=bitcoin&vs_currencies=usd`;
-
-        console.log('Fetching Crypto Data from:', apiUrl); 
-    
-        const response = await axios.get(apiUrl);
-        console.log('Crypto API Response:', response.data);
-        
-        setCryptoDetails(response.data);
-      } catch (error) {
-        console.error('Error fetching crypto data:', error.response?.data || error.message);
-        return null;
-    }
-  };
+  const { id } = router.query;
+  const [cryptoData, setCryptoData] = useState([]);
 
   useEffect(() => {
-    if (id) {
-      fetchCryptoDetails(id);
-    }
+    if (!id) return;
+
+    const fetchCryptoHistory = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_COINGECKO_API_URL}/coins/${id}/market_chart?vs_currency=usd&days=7`
+        );
+
+        setCryptoData(response.data.prices);
+      } catch (error) {
+        console.error('Error fetching crypto history:', error);
+      }
+    };
+
+    fetchCryptoHistory();
   }, [id]);
 
-  if (!cryptoDetails) return <div>Loading...</div>;
+  const chartData = {
+    labels: cryptoData.map(([timestamp]) => new Date(timestamp).toLocaleDateString()),
+    datasets: [
+      {
+        label: 'Price (USD)',
+        data: cryptoData.map(([_, price]) => price),
+        borderColor: 'gold',
+        fill: false,
+      },
+    ],
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-semibold text-center mb-8">{cryptoDetails.name} Details</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Crypto Price History: {id}</h1>
 
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold">{cryptoDetails.name}</h2>
-        <p>Price: ${cryptoDetails.market_data.current_price.usd}</p>
-        <p>24h Change: {cryptoDetails.market_data.price_change_percentage_24h}%</p>
-        <p>Market Cap: ${cryptoDetails.market_data.market_cap.usd}</p>
-        {/*<h3 className="mt-4 text-lg font-semibold">Historical Data</h3>
-        <p>More detailed information can go here...</p> */}
-      </div>
+      {cryptoData.length > 0 ? (
+        <>
+          <Line data={chartData} className="mt-6"/>
+          <table className="mt-6 w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-700 text-white">
+                <th className="p-2">Date</th>
+                <th className="p-2">Price (USD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cryptoData.map(([timestamp, price], index) => (
+                <tr key={index} className="border border-gray-300">
+                  <td className="p-2">{new Date(timestamp).toLocaleDateString()}</td>
+                  <td className="p-2">${price.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : (
+        <p>Loading data...</p>
+      )}
     </div>
   );
 };
 
-export default CryptoDetails;
+export default CryptoDetail;
